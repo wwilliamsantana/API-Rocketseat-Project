@@ -1,7 +1,8 @@
+import { hash } from 'bcryptjs';
 import { inject, injectable } from 'tsyringe';
 
-import { IUserRepositoryDTO } from '../dtos/IUserRepositoryDTO';
-import { IUserRepository } from '../repositories/IUserRepository';
+import { IUserRepositoryDTO } from '../../dtos/IUserRepositoryDTO';
+import { IUserRepository } from '../../repositories/IUserRepository';
 
 @injectable()
 class UserRepositoryUseCase {
@@ -13,16 +14,22 @@ class UserRepositoryUseCase {
     async execute({
         name,
         email,
-        username,
         driver_license,
         password,
     }: IUserRepositoryDTO): Promise<void> {
+        const userAlreadyExist = await this.userRepository.findByEmail(email);
+
+        if (userAlreadyExist) {
+            throw new Error('User already exists');
+        }
+
+        const passwordHash = await hash(password, 8);
+
         await this.userRepository.create({
             name,
             email,
-            username,
             driver_license,
-            password,
+            password: passwordHash,
         });
     }
 }

@@ -3,7 +3,6 @@ interface IUserRepositoryDTO {
     email: string;
     password: string;
     driver_license: string;
-    username: string;
 }
 
 export { IUserRepositoryDTO };

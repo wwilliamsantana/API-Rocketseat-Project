@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import { verify } from 'jsonwebtoken';
 
+import { AppError } from '../error/AppError';
 import { UserRepository } from '../modules/accounts/repositories/implementation/UserRepository';
 
 export async function ensureAuthenticated(
@@ -11,7 +12,7 @@ export async function ensureAuthenticated(
     const authHeader = request.headers.authorization;
 
     if (!authHeader) {
-        throw new Error('Token missing!');
+        throw new AppError('Token missing!', 401);
     }
 
     const [, token] = authHeader.split(' ');
@@ -29,11 +30,11 @@ export async function ensureAuthenticated(
         );
 
         if (!idAlreadyExist) {
-            throw new Error('Invalid token');
+            throw new AppError('Invalid token', 401);
         }
 
         next();
     } catch {
-        throw new Error('Invalid token');
+        throw new AppError('Invalid token', 401);
     }
 }

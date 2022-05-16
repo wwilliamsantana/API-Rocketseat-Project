@@ -4,6 +4,10 @@ import { verify } from 'jsonwebtoken';
 import { AppError } from '../error/AppError';
 import { UserRepository } from '../modules/accounts/repositories/implementation/UserRepository';
 
+interface IPayload {
+    sub: string;
+}
+
 export async function ensureAuthenticated(
     request: Request,
     response: Response,
@@ -21,17 +25,19 @@ export async function ensureAuthenticated(
         const { sub: user_id } = verify(
             token,
             'f49974bb19d32db7cdfbcb8c87e8211670338202',
-        );
+        ) as IPayload;
 
         const userRepository = new UserRepository();
 
-        const idAlreadyExist = await userRepository.findById(
-            user_id.toString(),
-        );
+        const idAlreadyExist = await userRepository.findById(user_id);
 
         if (!idAlreadyExist) {
             throw new AppError('Invalid token', 401);
         }
+
+        request.user = {
+            id: user_id,
+        };
 
         next();
     } catch {
